@@ -139,6 +139,9 @@ func (c *Client) NewRequest(urlStr string, fn requestBodyFn) (*http.Request, err
 	}
 
 	body, contentType, err := fn(token.AccessToken)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(http.MethodPost, u.String(), body)
 	if err != nil {
 		return nil, err

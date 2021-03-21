@@ -2,6 +2,7 @@ package hanetai
 
 import (
 	"context"
+	"net/url"
 	"os"
 	"reflect"
 	"testing"
@@ -318,6 +319,46 @@ func TestPersonService_ListByPlace(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("PersonService.ListByPlace() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAvaterSize_SetUrlValues(t *testing.T) {
+	type fields struct {
+		Height int
+		Width  int
+	}
+	type args struct {
+		setter url.Values
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		want   string
+	}{
+		{
+			name: "Happy Case",
+			fields: fields{
+				Height: 300,
+				Width:  400,
+			},
+			args: args{
+				setter: url.Values{},
+			},
+			want: "height=300&width=400",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := AvaterSize{
+				Height: tt.fields.Height,
+				Width:  tt.fields.Width,
+			}
+			s.SetUrlValues(tt.args.setter)
+			if got := tt.args.setter.Encode(); got != tt.want {
+				t.Errorf("SetUrlValues() = %v, want %v", got, tt.want)
 			}
 		})
 	}

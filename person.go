@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"strconv"
 )
 
 type PersonService service
@@ -41,17 +42,22 @@ const (
 	fileName = "avatar.png"
 )
 
-// AvaterSize store avatar size in width * height
-type AvaterSize [2]string
-
-func (as AvaterSize) SetSize(setter interface {
-	Set(field string, value string)
-}) {
-	setter.Set("height", as[0])
-	setter.Set("width", as[1])
+// AvaterSize store avatar size in height*width
+type AvaterSize struct {
+	Height int `json:"height"`
+	Width  int `json:"width"`
 }
 
-var DefaultAvatarSize = AvaterSize{"736", "1280"}
+type UrlValuesSetter interface {
+	Set(field string, value string)
+}
+
+func (s AvaterSize) SetUrlValues(setter UrlValuesSetter) {
+	setter.Set("height", strconv.Itoa(s.Height))
+	setter.Set("width", strconv.Itoa(s.Width))
+}
+
+var DefaultAvatarSize = AvaterSize{Height: 736, Width: 1280}
 
 func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) (*PersonRegisterResponse, error) {
 	req, err := s.client.NewRequest("employee/register",

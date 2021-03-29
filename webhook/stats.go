@@ -15,6 +15,7 @@ var (
 	mLatencyMs = stats.Float64("latency", "The latency in milliseconds", "ms")
 	mFaces     = stats.Int64("faces_detected", "The number of faces detected", "1")
 
+	keyDeviceID   = tag.MustNewKey("giautm.dev/hanetai/device-id")
 	keyPersonType = tag.MustNewKey("giautm.dev/hanetai/person-type")
 	keyPlaceID    = tag.MustNewKey("giautm.dev/hanetai/place-id")
 )
@@ -55,6 +56,9 @@ func ReportStats(fn WebhookFn) WebhookFn {
 		m := []tag.Mutator{}
 		ms := []stats.Measurement{}
 
+		if data.DeviceData != nil {
+			m = append(m, tag.Upsert(keyDeviceID, data.DeviceID))
+		}
 		if data.PlaceData != nil {
 			m = append(m, tag.Upsert(keyPlaceID, strconv.Itoa(data.PlaceID.Int())))
 		}

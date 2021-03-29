@@ -68,8 +68,9 @@ type PlaceData struct {
 type WebhookFn func(context.Context, *Webhook) error
 
 type Options struct {
-	Stats  bool
-	Verify func(*EventData) bool
+	OnError func(context.Context, error)
+	Stats   bool
+	Verify  func(*EventData) bool
 }
 
 type Option = func(*Options)
@@ -89,6 +90,12 @@ func WithSecretVerify(secret []byte) Option {
 func WithStats() Option {
 	return func(o *Options) {
 		o.Stats = true
+	}
+}
+
+func WithOnError(fn func(context.Context, error)) Option {
+	return func(o *Options) {
+		o.OnError = fn
 	}
 }
 
@@ -114,9 +121,13 @@ func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
 			return
 		}
 
+		ctx := r.Context()
 		var data Webhook
 
 		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			if opts.OnError != nil {
+				opts.OnError(ctx, err)
+			}
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -126,7 +137,10 @@ func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
 			return
 		}
 
-		if err := fn(r.Context(), &data); err != nil {
+		if err := fn(ctx, &data); err != nil {
+			if opts.OnError != nil {
+				opts.OnError(ctx, err)
+			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}

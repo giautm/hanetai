@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"hash"
 	"net/http"
+	"os"
 )
 
 type ActionType string
@@ -66,7 +67,46 @@ type PlaceData struct {
 
 type WebhookFn func(context.Context, *Webhook) error
 
-func Handler(clientSecret []byte, fn WebhookFn) http.Handler {
+type Options struct {
+	Stats  bool
+	Verify func(*EventData) bool
+}
+
+type Option = func(*Options)
+
+func WithSecretVerify(secret []byte) Option {
+	if secret == nil {
+		secret = ([]byte)(os.Getenv("HANET_CLIENT_SECRET"))
+	}
+
+	return func(o *Options) {
+		o.Verify = func(data *EventData) bool {
+			return verifyHash(md5.New(), secret, data)
+		}
+	}
+}
+
+func WithStats() Option {
+	return func(o *Options) {
+		o.Stats = true
+	}
+}
+
+func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
+	opts := &Options{
+		Stats: false,
+		Verify: func(*EventData) bool {
+			return true
+		},
+	}
+
+	for _, opt := range optsFn {
+		opt(opts)
+	}
+	if opts.Stats {
+		fn = ReportStats(fn)
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.ContentLength == 0 {
 			// Hanet Check Request
@@ -81,7 +121,7 @@ func Handler(clientSecret []byte, fn WebhookFn) http.Handler {
 			return
 		}
 
-		if !verifyHash(md5.New(), clientSecret, data.EventData) {
+		if !opts.Verify(data.EventData) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}

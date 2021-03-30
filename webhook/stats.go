@@ -25,7 +25,7 @@ func EnableViews() error {
 		Name:        "hanet/latency_webhook",
 		Measure:     mLatencyMs,
 		Description: "The distribution of the latencies",
-		TagKeys:     []tag.Key{keyPlaceID},
+		TagKeys:     []tag.Key{keyPlaceID, keyDeviceID},
 		Aggregation: view.Distribution(0, 25, 100, 200, 400, 800, 10000),
 	}
 
@@ -33,7 +33,7 @@ func EnableViews() error {
 		Name:        "hanet/faces_detected",
 		Measure:     mFaces,
 		Description: "The number of faces detected",
-		TagKeys:     []tag.Key{keyPlaceID, keyPersonType},
+		TagKeys:     []tag.Key{keyPlaceID, keyDeviceID, keyPersonType},
 		// Notice that the measure "mLatencyMs" is the same as
 		// latencyView's but here the aggregation is a count aggregation
 		// while the latencyView has a distribution aggregation.

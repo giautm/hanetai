@@ -34,8 +34,9 @@ type Client struct {
 
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 
-	Places  *PlaceService
+	Devices *DeviceService
 	Persons *PersonService
+	Places  *PlaceService
 }
 
 type service struct {
@@ -67,8 +68,9 @@ func NewClient(httpClient HttpClient, ts oauth2.TokenSource) *Client {
 
 	c.common.client = c
 
-	c.Places = (*PlaceService)(&c.common)
+	c.Devices = (*DeviceService)(&c.common)
 	c.Persons = (*PersonService)(&c.common)
+	c.Places = (*PlaceService)(&c.common)
 
 	return c
 }

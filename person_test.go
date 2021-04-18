@@ -352,7 +352,7 @@ func TestAvaterSize_SetUrlValues(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := AvaterSize{
+			s := AvatarSize{
 				Height: tt.fields.Height,
 				Width:  tt.fields.Width,
 			}

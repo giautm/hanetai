@@ -42,8 +42,8 @@ const (
 	fileName = "avatar.png"
 )
 
-// AvaterSize store avatar size in height*width
-type AvaterSize struct {
+// AvatarSize store avatar size in height*width
+type AvatarSize struct {
 	Height int `json:"height"`
 	Width  int `json:"width"`
 }
@@ -52,12 +52,15 @@ type UrlValuesSetter interface {
 	Set(field string, value string)
 }
 
-func (s AvaterSize) SetUrlValues(setter UrlValuesSetter) {
+func (s AvatarSize) SetUrlValues(setter UrlValuesSetter) {
 	setter.Set("height", strconv.Itoa(s.Height))
 	setter.Set("width", strconv.Itoa(s.Width))
 }
 
-var DefaultAvatarSize = AvaterSize{Height: 736, Width: 1280}
+var DefaultAvatarSize = AvatarSize{
+	Height: 736,
+	Width:  1280,
+}
 
 func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) (*PersonRegisterResponse, error) {
 	req, err := s.client.NewRequest("employee/register",

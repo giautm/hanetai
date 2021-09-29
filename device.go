@@ -20,7 +20,7 @@ type ConnectionStatusResponse struct {
 }
 
 func (s *DeviceService) GetConnectionStatus(ctx context.Context, data *ConnectionStatusRequest) (*ConnectionStatusResponse, error) {
-	req, err := s.client.NewRequest("device/get-connection-status", urlencodeBody(data))
+	req, err := s.client.NewRequest("device/getConnectionStatus", urlencodeBody(data))
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ type ListDevicesResponse struct {
 }
 
 func (s *DeviceService) GetListDevices(ctx context.Context) (*ListDevicesResponse, error) {
-	req, err := s.client.NewRequest("device/get-list-device", urlencodeBody(nil))
+	req, err := s.client.NewRequest("device/getListDevice", urlencodeBody(nil))
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,7 @@ type ListDevicesByPlaceRequest struct {
 }
 
 func (s *DeviceService) GetListDevicesByPlace(ctx context.Context, data *ListDevicesByPlaceRequest) (*ListDevicesResponse, error) {
-	req, err := s.client.NewRequest("device/get-list-device-by-place", urlencodeBody(data))
+	req, err := s.client.NewRequest("device/getListDeviceByPlace", urlencodeBody(data))
 	if err != nil {
 		return nil, err
 	}

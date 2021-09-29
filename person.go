@@ -63,7 +63,7 @@ var DefaultAvatarSize = AvatarSize{
 }
 
 func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) (*PersonRegisterResponse, error) {
-	req, err := s.client.NewRequest("employee/register",
+	req, err := s.client.NewRequest("person/register",
 		multipartBody(pu.File, func(w *multipart.Writer) error {
 			w.WriteField("name", pu.Name)
 			w.WriteField("aliasID", pu.AliasID)
@@ -194,7 +194,7 @@ type PersonListItem struct {
 }
 
 func (s *PersonService) ListByPlace(ctx context.Context, data PersonListByPlaceRequest) ([]PersonListItem, error) {
-	req, err := s.client.NewRequest("person/get-list-by-place", urlencodeBody(data))
+	req, err := s.client.NewRequest("person/getListByPlace", urlencodeBody(data))
 	if err != nil {
 		return nil, err
 	}

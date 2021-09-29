@@ -46,6 +46,7 @@ type service struct {
 const (
 	defaultBaseURL = "https://partner.hanet.ai/"
 	userAgent      = "hanetai-sdk"
+	fileName       = "avatar.png"
 )
 
 func NewClient(httpClient HttpClient, ts oauth2.TokenSource) *Client {
@@ -101,14 +102,17 @@ func multipartBody(file io.Reader, fn func(m *multipart.Writer) error) requestBo
 		}
 
 		w.WriteField("token", token)
-		f, err := w.CreateFormFile("file", fileName)
-		if err != nil {
-			return nil, "", err
-		}
 
-		_, err = io.Copy(f, file)
-		if err != nil {
-			return nil, "", err
+		if file != nil {
+			f, err := w.CreateFormFile("file", fileName)
+			if err != nil {
+				return nil, "", err
+			}
+
+			_, err = io.Copy(f, file)
+			if err != nil {
+				return nil, "", err
+			}
 		}
 
 		err = w.Close()

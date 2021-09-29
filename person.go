@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/url"
 	"strconv"
 )
 
@@ -25,8 +26,20 @@ type PersonFaceUpdateRequest struct {
 	File    io.Reader
 }
 
+type PersonFaceURLUpdateRequest struct {
+	AliasID string  `json:"aliasID"`
+	PlaceID int     `json:"placeID"`
+	FileURL url.URL `json:"url"`
+}
+
 type PersonRegisterRequest struct {
 	*PersonFaceUpdateRequest
+	Name  string `json:"name"`
+	Title string `json:"title"`
+	Type  string `json:"type"`
+}
+type PersonRegisterURLRequest struct {
+	*PersonFaceURLUpdateRequest
 	Name  string `json:"name"`
 	Title string `json:"title"`
 	Type  string `json:"type"`
@@ -37,10 +50,6 @@ type PersonRegisterResponse struct {
 	ID   string `json:"personID"`
 	File string `json:"file"`
 }
-
-const (
-	fileName = "avatar.png"
-)
 
 // AvatarSize store avatar size in height*width
 type AvatarSize struct {
@@ -87,9 +96,53 @@ func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) 
 	return &p, nil
 }
 
+func (s *PersonService) RegisterByUrl(ctx context.Context, pu PersonRegisterURLRequest) (*PersonRegisterResponse, error) {
+	req, err := s.client.NewRequest("person/registerByUrl",
+		multipartBody(nil, func(w *multipart.Writer) error {
+			w.WriteField("name", pu.Name)
+			w.WriteField("url", pu.FileURL.String())
+			w.WriteField("aliasID", pu.AliasID)
+			w.WriteField("placeID", fmt.Sprintf("%d", pu.PlaceID))
+			w.WriteField("title", pu.Title)
+			w.WriteField("type", pu.Type)
+
+			return nil
+		}))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var p PersonRegisterResponse
+	_, err = s.client.Do(ctx, req, &p)
+	if err != nil {
+		return nil, err
+	}
+
+	return &p, nil
+}
+
 func (s *PersonService) UpdateByFaceImage(ctx context.Context, pu PersonFaceUpdateRequest) error {
 	req, err := s.client.NewRequest("person/updateByFaceImage",
 		multipartBody(pu.File, func(w *multipart.Writer) error {
+			w.WriteField("aliasID", pu.AliasID)
+			w.WriteField("placeID", fmt.Sprintf("%d", pu.PlaceID))
+
+			return nil
+		}))
+
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Do(ctx, req, nil)
+	return err
+}
+
+func (s *PersonService) UpdateByFaceUrl(ctx context.Context, pu PersonFaceURLUpdateRequest) error {
+	req, err := s.client.NewRequest("person/updateByFaceUrl",
+		multipartBody(nil, func(w *multipart.Writer) error {
+			w.WriteField("url", pu.FileURL.String())
 			w.WriteField("aliasID", pu.AliasID)
 			w.WriteField("placeID", fmt.Sprintf("%d", pu.PlaceID))
 
@@ -202,4 +255,18 @@ func (s *PersonService) ListByPlace(ctx context.Context, data PersonListByPlaceR
 	var a []PersonListItem
 	_, err = s.client.Do(ctx, req, &a)
 	return a, err
+}
+
+type TakeFacePictureRequest struct {
+	DeviceID int `url:"deviceID"`
+}
+
+func (s *PersonService) TakeFacePicture(ctx context.Context, data TakeFacePictureRequest) error {
+	req, err := s.client.NewRequest("person/takeFacePicture", urlencodeBody(data))
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Do(ctx, req, nil)
+	return err
 }

@@ -22,10 +22,11 @@ const (
 type DataType string
 
 const (
-	DataDevice = DataType("device")
-	DataLog    = DataType("log")
-	DataPerson = DataType("person")
-	DataPlace  = DataType("place")
+	DataCheckinPicture = DataType("checkin_picture")
+	DataDevice         = DataType("device")
+	DataLog            = DataType("log")
+	DataPerson         = DataType("person")
+	DataPlace          = DataType("place")
 )
 
 type Webhook struct {

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
-	"net/url"
 	"strconv"
 )
 
@@ -27,9 +26,9 @@ type PersonFaceUpdateRequest struct {
 }
 
 type PersonFaceURLUpdateRequest struct {
-	AliasID string  `json:"aliasID"`
-	PlaceID int     `json:"placeID"`
-	FileURL url.URL `json:"url"`
+	AliasID string `json:"aliasID"`
+	PlaceID int    `json:"placeID"`
+	FileURL string `json:"url"`
 }
 
 type PersonRegisterRequest struct {
@@ -96,11 +95,11 @@ func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) 
 	return &p, nil
 }
 
-func (s *PersonService) RegisterByUrl(ctx context.Context, pu PersonRegisterURLRequest) (*PersonRegisterResponse, error) {
+func (s *PersonService) RegisterByURL(ctx context.Context, pu PersonRegisterURLRequest) (*PersonRegisterResponse, error) {
 	req, err := s.client.NewRequest("person/registerByUrl",
 		multipartBody(nil, func(w *multipart.Writer) error {
 			w.WriteField("name", pu.Name)
-			w.WriteField("url", pu.FileURL.String())
+			w.WriteField("url", pu.FileURL)
 			w.WriteField("aliasID", pu.AliasID)
 			w.WriteField("placeID", fmt.Sprintf("%d", pu.PlaceID))
 			w.WriteField("title", pu.Title)
@@ -139,10 +138,10 @@ func (s *PersonService) UpdateByFaceImage(ctx context.Context, pu PersonFaceUpda
 	return err
 }
 
-func (s *PersonService) UpdateByFaceUrl(ctx context.Context, pu PersonFaceURLUpdateRequest) error {
+func (s *PersonService) UpdateByFaceURL(ctx context.Context, pu PersonFaceURLUpdateRequest) error {
 	req, err := s.client.NewRequest("person/updateByFaceUrl",
 		multipartBody(nil, func(w *multipart.Writer) error {
-			w.WriteField("url", pu.FileURL.String())
+			w.WriteField("url", pu.FileURL)
 			w.WriteField("aliasID", pu.AliasID)
 			w.WriteField("placeID", fmt.Sprintf("%d", pu.PlaceID))
 

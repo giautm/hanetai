@@ -363,3 +363,46 @@ func TestAvaterSize_SetUrlValues(t *testing.T) {
 		})
 	}
 }
+
+func TestPersonService_TakeFacePicture(t *testing.T) {
+	type fields struct {
+		client *Client
+	}
+	type args struct {
+		ctx  context.Context
+		data TakeFacePictureRequest
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "happy case checkin_picture",
+			fields: fields{
+				client: NewClient(nil, ts),
+			},
+			args: args{
+				ctx: context.Background(),
+				data: TakeFacePictureRequest{
+					DeviceID: "C21024B155",
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	//
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &PersonService{
+				client: tt.fields.client,
+			}
+			if err := s.TakeFacePicture(tt.args.ctx, tt.args.data); (err != nil) != tt.wantErr {
+				t.Errorf("PersonService.TakeFacePicture() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+
+}

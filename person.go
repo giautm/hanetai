@@ -257,7 +257,7 @@ func (s *PersonService) ListByPlace(ctx context.Context, data PersonListByPlaceR
 }
 
 type TakeFacePictureRequest struct {
-	DeviceID int `url:"deviceID"`
+	DeviceID string `url:"deviceID"`
 }
 
 func (s *PersonService) TakeFacePicture(ctx context.Context, data TakeFacePictureRequest) error {

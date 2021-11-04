@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"hash"
 	"net/http"
 	"os"
@@ -29,7 +30,7 @@ const (
 	DataPlace          = DataType("place")
 )
 
-type Webhook struct {
+type Data struct {
 	DataType DataType `json:"data_type"`
 
 	*EventData
@@ -48,12 +49,34 @@ type EventData struct {
 	Time uint64 `json:"time"`
 }
 
+type PersonType string
+
+const (
+	PersonEmployee PersonType = "0"
+	PersonCustomer PersonType = "1"
+	PersonStranger PersonType = "2"
+)
+
+func (p PersonType) String() string {
+	switch p {
+	case PersonEmployee:
+		return "Employee"
+	case PersonCustomer:
+		return "Customer"
+	case PersonStranger:
+		return "Stranger"
+	}
+
+	return fmt.Sprintf("Unknown(%s)", (string)(p))
+}
+
 type PersonData struct {
 	DetectedImageURL string `json:"detected_image_url"`
 	PersonID         string `json:"personID"`
 	AliasID          string `json:"aliasID"`
 	PersonName       string `json:"personName"`
-	PersonType       string `json:"personType"`
+
+	PersonType PersonType `json:"personType"`
 }
 
 type DeviceData struct {
@@ -66,7 +89,15 @@ type PlaceData struct {
 	PlaceName string `json:"placeName"`
 }
 
-type WebhookFn func(context.Context, *Webhook) error
+type Handler interface {
+	ServeWebhook(context.Context, *Data) error
+}
+
+type HandlerFunc func(context.Context, *Data) error
+
+func (fn HandlerFunc) ServeWebhook(ctx context.Context, data *Data) error {
+	return fn(ctx, data)
+}
 
 type Options struct {
 	OnError func(context.Context, error)
@@ -78,7 +109,11 @@ type Option = func(*Options)
 
 func WithSecretVerify(secret []byte) Option {
 	if secret == nil {
-		secret = ([]byte)(os.Getenv("HANET_CLIENT_SECRET"))
+		if s := os.Getenv("HANET_CLIENT_SECRET"); s == "" {
+			panic("HANET_CLIENT_SECRET is not set")
+		} else {
+			secret = ([]byte)(s)
+		}
 	}
 
 	return func(o *Options) {
@@ -100,18 +135,18 @@ func WithOnError(fn func(context.Context, error)) Option {
 	}
 }
 
-func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
-	opts := &Options{
+func NewHTTPHandler(fn Handler, opts ...Option) http.HandlerFunc {
+	o := &Options{
 		Stats: false,
 		Verify: func(*EventData) bool {
 			return true
 		},
 	}
 
-	for _, opt := range optsFn {
-		opt(opts)
+	for _, opt := range opts {
+		opt(o)
 	}
-	if opts.Stats {
+	if o.Stats {
 		fn = ReportStats(fn)
 	}
 
@@ -123,24 +158,24 @@ func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
 		}
 
 		ctx := r.Context()
-		var data Webhook
 
+		var data Data
 		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-			if opts.OnError != nil {
-				opts.OnError(ctx, err)
+			if o.OnError != nil {
+				o.OnError(ctx, err)
 			}
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		if !opts.Verify(data.EventData) {
+		if !o.Verify(data.EventData) {
 			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
-		if err := fn(ctx, &data); err != nil {
-			if opts.OnError != nil {
-				opts.OnError(ctx, err)
+		if err := fn.ServeWebhook(ctx, &data); err != nil {
+			if o.OnError != nil {
+				o.OnError(ctx, err)
 			}
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -151,12 +186,13 @@ func Handler(fn WebhookFn, optsFn ...Option) http.Handler {
 }
 
 func verifyHash(h hash.Hash, secret []byte, e *EventData) bool {
+	h.Reset()
 	h.Write(secret)
 	h.Write([]byte(e.ID))
+	s := h.Sum(nil)
 
-	src := h.Sum(nil)
-	dst := make([]byte, hex.EncodedLen(len(src)))
-	hex.Encode(dst, src)
+	dst := make([]byte, hex.EncodedLen(len(s)))
+	hex.Encode(dst, s)
 
 	return subtle.ConstantTimeCompare([]byte(e.Hash), dst) == 1
 }

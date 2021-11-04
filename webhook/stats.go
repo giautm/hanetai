@@ -2,7 +2,6 @@ package webhook
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -45,14 +44,8 @@ func EnableViews() error {
 	return view.Register(latencyView, facesDetectedCountView)
 }
 
-var mapPersonTypes = map[string]string{
-	"0": "Employee",
-	"1": "Customer",
-	"2": "Stranger",
-}
-
-func ReportStats(fn WebhookFn) WebhookFn {
-	return func(ctx context.Context, data *Webhook) (err error) {
+func ReportStats(fn Handler) HandlerFunc {
+	return func(ctx context.Context, data *Data) (err error) {
 		m := []tag.Mutator{}
 		ms := []stats.Measurement{}
 
@@ -63,11 +56,7 @@ func ReportStats(fn WebhookFn) WebhookFn {
 			m = append(m, tag.Upsert(keyPlaceID, strconv.Itoa(data.PlaceID.Int())))
 		}
 		if data.PersonData != nil {
-			if t, ok := mapPersonTypes[data.PersonType]; ok {
-				m = append(m, tag.Upsert(keyPersonType, t))
-			} else {
-				m = append(m, tag.Upsert(keyPersonType, fmt.Sprintf("unknown: %s", data.PersonType)))
-			}
+			m = append(m, tag.Upsert(keyPersonType, data.PersonType.String()))
 		}
 
 		ctx, err = tag.New(ctx, m...)
@@ -86,6 +75,6 @@ func ReportStats(fn WebhookFn) WebhookFn {
 			ms = append(ms, mFaces.M(1))
 		}
 
-		return fn(ctx, data)
+		return fn.ServeWebhook(ctx, data)
 	}
 }

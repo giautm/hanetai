@@ -1,6 +1,7 @@
 package webhook
 
 import (
+	"bytes"
 	"context"
 	"crypto/md5"
 	"crypto/subtle"
@@ -8,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"hash"
+	"io"
 	"net/http"
 	"os"
 )
@@ -31,7 +33,8 @@ const (
 )
 
 type Data struct {
-	DataType DataType `json:"data_type"`
+	RawData  io.Reader `json:"-"`
+	DataType DataType  `json:"data_type"`
 
 	*EventData
 	*DeviceData
@@ -159,8 +162,11 @@ func NewHTTPHandler(fn Handler, opts ...Option) http.HandlerFunc {
 
 		ctx := r.Context()
 
-		var data Data
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		var (
+			data    Data
+			rawData bytes.Buffer
+		)
+		if err := json.NewDecoder(io.TeeReader(r.Body, &rawData)).Decode(&data); err != nil {
 			if o.OnError != nil {
 				o.OnError(ctx, err)
 			}
@@ -173,6 +179,7 @@ func NewHTTPHandler(fn Handler, opts ...Option) http.HandlerFunc {
 			return
 		}
 
+		data.RawData = &rawData
 		if err := fn.ServeWebhook(ctx, &data); err != nil {
 			if o.OnError != nil {
 				o.OnError(ctx, err)

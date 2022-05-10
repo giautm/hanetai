@@ -44,6 +44,25 @@ func (s *DeviceService) GetConnectionStatus(ctx context.Context, data *Connectio
 	}, nil
 }
 
+type SetDeviceMQTTRequest struct {
+	DeviceID    string `json:"deviceID" url:"deviceID"`
+	Enable      bool   `json:"enable" url:"enable,int"`
+	URL         string `json:"url" url:"url"`
+	Username    string `json:"username" url:"username"`
+	Password    string `json:"password" url:"password"`
+	Base64Image bool   `json:"image" url:"image,int"`
+}
+
+func (s *DeviceService) SetDeviceMQTT(ctx context.Context, data *SetDeviceMQTTRequest) error {
+	req, err := s.client.NewRequest("device/setDeviceMQTT", urlencodeBody(data))
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Do(ctx, req, nil)
+	return err
+}
+
 type DeviceInfo struct {
 	DeviceID   string `json:"deviceID"`
 	DeviceName string `json:"deviceName"`
@@ -107,9 +126,5 @@ func (s *DeviceService) UpdateDevice(ctx context.Context, data *UpdateDeviceRequ
 	}
 
 	_, err = s.client.Do(ctx, req, nil)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }

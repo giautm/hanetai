@@ -89,7 +89,12 @@ func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) 
 	var p PersonRegisterResponse
 	_, err = s.client.Do(ctx, req, &p)
 	if err != nil {
-		return nil, err
+		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
+			return nil, &DuplicatedImageError{
+				ServerError: serr,
+				person:      p.Person,
+			}
+		}
 	}
 
 	return &p, nil
@@ -115,9 +120,13 @@ func (s *PersonService) RegisterByURL(ctx context.Context, pu PersonRegisterURLR
 	var p PersonRegisterResponse
 	_, err = s.client.Do(ctx, req, &p)
 	if err != nil {
-		return nil, err
+		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
+			return nil, &DuplicatedImageError{
+				ServerError: serr,
+				person:      p.Person,
+			}
+		}
 	}
-
 	return &p, nil
 }
 
@@ -134,7 +143,16 @@ func (s *PersonService) UpdateByFaceImage(ctx context.Context, pu PersonFaceUpda
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	var p PersonRegisterResponse
+	_, err = s.client.Do(ctx, req, &p)
+	if err != nil {
+		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
+			return &DuplicatedImageError{
+				ServerError: serr,
+				person:      p.Person,
+			}
+		}
+	}
 	return err
 }
 
@@ -152,7 +170,16 @@ func (s *PersonService) UpdateByFaceURL(ctx context.Context, pu PersonFaceURLUpd
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	var p PersonRegisterResponse
+	_, err = s.client.Do(ctx, req, &p)
+	if err != nil {
+		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
+			return &DuplicatedImageError{
+				ServerError: serr,
+				person:      p.Person,
+			}
+		}
+	}
 	return err
 }
 

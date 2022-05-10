@@ -185,15 +185,14 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*htt
 		return resp, err
 	}
 
+	if v != nil {
+		err = json.Unmarshal(env.Data, v)
+	}
 	if env.ReturnCode != 1 {
 		return resp, &ServerError{
 			Code:    env.ReturnCode,
 			Message: env.ReturnMessage,
 		}
-	}
-
-	if v != nil {
-		err = json.Unmarshal(env.Data, v)
 	}
 
 	return resp, err

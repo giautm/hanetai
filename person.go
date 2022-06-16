@@ -95,6 +95,7 @@ func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) 
 				person:      p.Person,
 			}
 		}
+		return nil, err
 	}
 
 	return &p, nil
@@ -126,6 +127,7 @@ func (s *PersonService) RegisterByURL(ctx context.Context, pu PersonRegisterURLR
 				person:      p.Person,
 			}
 		}
+		return nil, err
 	}
 	return &p, nil
 }

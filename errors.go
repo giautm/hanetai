@@ -5,19 +5,13 @@ import "fmt"
 type ServerError struct {
 	Code    int
 	Message string
+
+	// Person is set if the error is caused by a duplicated
+	Person *Person
 }
 
 func (se ServerError) Error() string {
 	return fmt.Sprintf("hanet (%d): %s", se.Code, se.Message)
-}
-
-type DuplicatedImageError struct {
-	*ServerError
-	person *Person
-}
-
-func (e *DuplicatedImageError) Person() *Person {
-	return e.person
 }
 
 const (

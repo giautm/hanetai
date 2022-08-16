@@ -16,6 +16,7 @@ var cli struct {
 		RmByPlaceAlias PersonRmByAliasCmd `cmd:"" help:"Remove a person from the place"`
 	} `cmd:""`
 	Device struct {
+		Ls     DeviceLsCmd               `cmd:"" help:"List device at the place."`
 		Status DeviceConnectionStatusCmd `cmd:"" help:"Get device connection status."`
 	} `cmd:""`
 }

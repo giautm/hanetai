@@ -45,6 +45,7 @@ type PersonLsCmd struct {
 	PlaceID    int    `kong:"required,name='place-id',help:'The place to list persons'"`
 	PersonType string `kong:"optional,name='type',help:'The person type'"`
 	JSON       bool   `kong:"optional,name='json',default:false"`
+	NoHeader   bool   `kong:"optional,name='no-header',default:false"`
 }
 
 func (l *PersonLsCmd) Run(ctx *CliContext) error {
@@ -65,15 +66,17 @@ func (l *PersonLsCmd) Run(ctx *CliContext) error {
 	s := csv.NewWriter(w)
 	defer s.Flush()
 
-	err = s.Write([]string{
-		"PersonID",
-		"AliasID",
-		"Title",
-		"Name",
-		"Avatar",
-	})
-	if err != nil {
-		return err
+	if !l.NoHeader {
+		err = s.Write([]string{
+			"PersonID",
+			"AliasID",
+			"Title",
+			"Name",
+			"Avatar",
+		})
+		if err != nil {
+			return err
+		}
 	}
 	for _, i := range items {
 		err = s.Write([]string{

@@ -204,6 +204,20 @@ func (s *PersonService) RemoveByPlace(ctx context.Context, data PersonRemoveByPl
 	return err
 }
 
+type PersonRemovePersonByIDRequest struct {
+	PersonID string `url:"personID"`
+}
+
+func (s *PersonService) RemovePersonByID(ctx context.Context, data PersonRemovePersonByIDRequest) error {
+	req, err := s.client.NewRequest("person/removePersonByID", urlencodeBody(data))
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Do(ctx, req, nil)
+	return err
+}
+
 type PersonUpdateRequest struct {
 	Name    string `json:"name"`
 	Title   string `json:"title"`

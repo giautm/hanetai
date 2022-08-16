@@ -4,7 +4,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"giautm.dev/hanetai"
 )
@@ -44,13 +43,9 @@ func (r *PersonRmByAliasCmd) Run(ctx *CliContext) error {
 type PersonLsCmd struct {
 	PlaceID    int    `kong:"required,name='place-id',help:'The place to list persons'"`
 	PersonType string `kong:"optional,name='type',help:'The person type'"`
-	JSON       bool   `kong:"optional,name='json',default:false"`
-	NoHeader   bool   `kong:"optional,name='no-header',default:false"`
 }
 
 func (l *PersonLsCmd) Run(ctx *CliContext) error {
-	w := os.Stdout
-
 	c := ctx.NewClient()
 	items, err := c.Persons.ListByPlace(ctx.Context, hanetai.PersonListByPlaceRequest{
 		PlaceID: l.PlaceID,
@@ -59,14 +54,14 @@ func (l *PersonLsCmd) Run(ctx *CliContext) error {
 	if err != nil {
 		return err
 	}
-	if l.JSON {
-		return json.NewEncoder(w).Encode(items)
+	if ctx.JSON {
+		return json.NewEncoder(ctx.Writer()).Encode(items)
 	}
 
-	s := csv.NewWriter(w)
+	s := csv.NewWriter(ctx.Writer())
 	defer s.Flush()
 
-	if !l.NoHeader {
+	if !ctx.NoHeader {
 		err = s.Write([]string{
 			"PersonID",
 			"AliasID",

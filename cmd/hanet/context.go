@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"giautm.dev/hanetai"
@@ -13,6 +15,8 @@ type CliContext struct {
 	AccessToken string
 	Context     context.Context
 	Debug       bool
+	JSON        bool
+	NoHeader    bool
 }
 
 func (c *CliContext) NewClient() *hanetai.Client {
@@ -23,4 +27,8 @@ func (c *CliContext) NewClient() *hanetai.Client {
 	return hanetai.NewClient(&http.Client{
 		Timeout: 60 * time.Second,
 	}, source)
+}
+
+func (c *CliContext) Writer() io.Writer {
+	return os.Stdout
 }

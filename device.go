@@ -12,7 +12,7 @@ type DeviceStatus struct {
 }
 
 type ConnectionStatusRequest struct {
-	DeviceIDs []string `json:"deviceIDs" url:"deviceIDs"`
+	DeviceIDs []string `json:"deviceIDs" url:"deviceIDs,comma"`
 }
 
 type ConnectionStatusResponse struct {

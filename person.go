@@ -268,6 +268,8 @@ func (s *PersonService) UpdateAliasID(ctx context.Context, data PersonUpdateAlia
 type PersonListByPlaceRequest struct {
 	PlaceID int    `url:"placeID"`
 	Type    string `url:"type"`
+	Page    int    `url:"page"`
+	Size    int    `url:"size"`
 }
 
 type PersonListItem struct {

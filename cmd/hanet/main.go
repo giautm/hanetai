@@ -11,6 +11,7 @@ var cli struct {
 	JSON        bool   `kong:"optional,name='json',default:false"`
 	NoHeader    bool   `kong:"optional,name='no-header',default:false"`
 	Person      struct {
+		Register       PersonRegisterCmd  `cmd:"" help:"Register person at the place."`
 		Ls             PersonLsCmd        `cmd:"" help:"List person at the place."`
 		Rm             PersonRmCmd        `cmd:"" help:"Remove a person using their ID."`
 		RmByPlaceAlias PersonRmByAliasCmd `cmd:"" help:"Remove a person from the place"`

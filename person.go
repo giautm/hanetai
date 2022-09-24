@@ -204,11 +204,26 @@ func (s *PersonService) RemoveByPlace(ctx context.Context, data PersonRemoveByPl
 	return err
 }
 
-type PersonRemovePersonByIDRequest struct {
+type PersonRemoveByListAliasIDRequest struct {
+	AliasIDs []string `url:"aliasIDs,comma"`
+	PlaceIDs []int    `url:"placeIDs,comma"`
+}
+
+func (s *PersonService) RemoveByListAliasID(ctx context.Context, data PersonRemoveByListAliasIDRequest) error {
+	req, err := s.client.NewRequest("person/removePersonByListAliasID", urlencodeBody(data))
+	if err != nil {
+		return err
+	}
+
+	_, err = s.client.Do(ctx, req, nil)
+	return err
+}
+
+type PersonRemoveByIDRequest struct {
 	PersonID string `url:"personID"`
 }
 
-func (s *PersonService) RemovePersonByID(ctx context.Context, data PersonRemovePersonByIDRequest) error {
+func (s *PersonService) RemoveByID(ctx context.Context, data PersonRemoveByIDRequest) error {
 	req, err := s.client.NewRequest("person/removePersonByID", urlencodeBody(data))
 	if err != nil {
 		return err

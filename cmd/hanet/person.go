@@ -16,7 +16,7 @@ type PersonRmCmd struct {
 
 func (r *PersonRmCmd) Run(ctx *CliContext) error {
 	c := ctx.NewClient()
-	err := c.Persons.RemovePersonByID(ctx.Context, hanetai.PersonRemovePersonByIDRequest{
+	err := c.Persons.RemoveByID(ctx.Context, hanetai.PersonRemoveByIDRequest{
 		PersonID: r.ID,
 	})
 	if err == nil {

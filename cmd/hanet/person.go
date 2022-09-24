@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"giautm.dev/hanetai"
 )
@@ -127,5 +128,101 @@ func (r *PersonRegisterCmd) Run(ctx *CliContext) error {
 		return json.NewEncoder(ctx.Writer()).Encode(person)
 	}
 	fmt.Printf("Successfully register %q\n", person.ID)
+	return nil
+}
+
+type LsByAliasCmd struct {
+	AliasID string `kong:"required,name='alias-id',help:'Alias ID'"`
+}
+
+func (l *LsByAliasCmd) Run(ctx *CliContext) error {
+	c := ctx.NewClient()
+	items, err := c.Persons.ListByAliasIDAllPlace(ctx.Context, hanetai.ListByAliasIDAllPlaceRequest{
+		AliasID: l.AliasID,
+	})
+	if err != nil {
+		return err
+	}
+	if ctx.JSON {
+		return json.NewEncoder(ctx.Writer()).Encode(items)
+	}
+
+	s := csv.NewWriter(ctx.Writer())
+	defer s.Flush()
+
+	if !ctx.NoHeader {
+		err = s.Write([]string{
+			"PersonID",
+			"AliasID",
+			"Title",
+			"Name",
+			"Avatar",
+			"PlaceID",
+		})
+		if err != nil {
+			return err
+		}
+	}
+	for _, i := range items {
+		err = s.Write([]string{
+			i.PersonID,
+			i.AliasID,
+			i.Title,
+			i.Name,
+			i.Avatar,
+			strconv.Itoa(i.PlaceID),
+		})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type UserInfoByAliasCmd struct {
+	AliasID string `kong:"required,name='alias-id',help:'Alias ID'"`
+}
+
+func (l *UserInfoByAliasCmd) Run(ctx *CliContext) error {
+	c := ctx.NewClient()
+	items, err := c.Persons.UserInfoByAliasID(ctx.Context, hanetai.UserInfoByAliasIDRequest{
+		AliasID: l.AliasID,
+	})
+	if err != nil {
+		return err
+	}
+	if ctx.JSON {
+		return json.NewEncoder(ctx.Writer()).Encode(items)
+	}
+
+	s := csv.NewWriter(ctx.Writer())
+	defer s.Flush()
+
+	if !ctx.NoHeader {
+		err = s.Write([]string{
+			"PersonID",
+			"AliasID",
+			"Title",
+			"Name",
+			"Avatar",
+			"PlaceID",
+		})
+		if err != nil {
+			return err
+		}
+	}
+	for _, i := range items {
+		err = s.Write([]string{
+			i.PersonID,
+			i.AliasID,
+			i.Title,
+			i.Name,
+			i.Avatar,
+			strconv.Itoa(i.PlaceID),
+		})
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

@@ -11,10 +11,12 @@ var cli struct {
 	JSON        bool   `kong:"optional,name='json',default:false"`
 	NoHeader    bool   `kong:"optional,name='no-header',default:false"`
 	Person      struct {
-		Register       PersonRegisterCmd  `cmd:"" help:"Register person at the place."`
-		Ls             PersonLsCmd        `cmd:"" help:"List person at the place."`
-		Rm             PersonRmCmd        `cmd:"" help:"Remove a person using their ID."`
-		RmByPlaceAlias PersonRmByAliasCmd `cmd:"" help:"Remove a person from the place"`
+		Register        PersonRegisterCmd  `cmd:"" help:"Register person at the place."`
+		Ls              PersonLsCmd        `cmd:"" help:"List person at the place."`
+		LsByAlias       LsByAliasCmd       `cmd:"" help:"List person at the place."`
+		UserInfoByAlias UserInfoByAliasCmd `cmd:"" help:"Get User Info by Alias ID."`
+		Rm              PersonRmCmd        `cmd:"" help:"Remove a person using their ID."`
+		RmByPlaceAlias  PersonRmByAliasCmd `cmd:"" help:"Remove a person from the place"`
 	} `cmd:""`
 	Device struct {
 		Ls     DeviceLsCmd               `cmd:"" help:"List device at the place."`

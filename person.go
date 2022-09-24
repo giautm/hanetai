@@ -291,6 +291,41 @@ func (s *PersonService) ListByPlace(ctx context.Context, data PersonListByPlaceR
 	return a, err
 }
 
+type ListByAliasIDAllPlaceRequest struct {
+	AliasID string `url:"aliasID"`
+}
+
+type PersonListItemWithPlace struct {
+	PersonListItem
+	PlaceID int `json:"placeID"`
+}
+
+func (s *PersonService) ListByAliasIDAllPlace(ctx context.Context, data ListByAliasIDAllPlaceRequest) ([]PersonListItemWithPlace, error) {
+	req, err := s.client.NewRequest("person/getListByAliasIDAllPlace", urlencodeBody(data))
+	if err != nil {
+		return nil, err
+	}
+
+	var a []PersonListItemWithPlace
+	_, err = s.client.Do(ctx, req, &a)
+	return a, err
+}
+
+type UserInfoByAliasIDRequest struct {
+	AliasID string `url:"aliasID"`
+}
+
+func (s *PersonService) UserInfoByAliasID(ctx context.Context, data UserInfoByAliasIDRequest) ([]PersonListItemWithPlace, error) {
+	req, err := s.client.NewRequest("person/getUserInfoByAliasID", urlencodeBody(data))
+	if err != nil {
+		return nil, err
+	}
+
+	var a []PersonListItemWithPlace
+	_, err = s.client.Do(ctx, req, &a)
+	return a, err
+}
+
 type TakeFacePictureRequest struct {
 	DeviceID string `url:"deviceID"`
 }

@@ -18,7 +18,7 @@ type ActionType string
 
 const (
 	ActionAdd    = ActionType("add")
-	ActionDetele = ActionType("delete")
+	ActionDelete = ActionType("delete")
 	ActionUpdate = ActionType("update")
 )
 
@@ -55,10 +55,21 @@ type EventData struct {
 type PersonType string
 
 const (
-	PersonEmployee PersonType = "0"
-	PersonCustomer PersonType = "1"
-	PersonStranger PersonType = "2"
+	PersonEmployee       PersonType = "0"
+	PersonCustomer       PersonType = "1"
+	PersonStranger       PersonType = "2"
+	PersonStranger3      PersonType = "3"
+	PersonStrangerNoFace PersonType = "4"
+	PersonStranger5      PersonType = "5"
+	PersonCameraPhoto    PersonType = "6"
 )
+
+func (p PersonType) IsStranger() bool {
+	return p == PersonStranger ||
+		p == PersonStranger3 ||
+		p == PersonStrangerNoFace ||
+		p == PersonStranger5
+}
 
 func (p PersonType) String() string {
 	switch p {
@@ -66,8 +77,10 @@ func (p PersonType) String() string {
 		return "Employee"
 	case PersonCustomer:
 		return "Customer"
-	case PersonStranger:
+	case PersonStranger, PersonStranger3, PersonStrangerNoFace, PersonStranger5:
 		return "Stranger"
+	case PersonCameraPhoto:
+		return "CameraPhoto"
 	}
 
 	return fmt.Sprintf("Unknown(%s)", (string)(p))

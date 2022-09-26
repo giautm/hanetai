@@ -37,6 +37,7 @@ type Client struct {
 	Devices *DeviceService
 	Persons *PersonService
 	Places  *PlaceService
+	Profile *ProfileService
 }
 
 type service struct {
@@ -72,6 +73,7 @@ func NewClient(httpClient HttpClient, ts oauth2.TokenSource) *Client {
 	c.Devices = (*DeviceService)(&c.common)
 	c.Persons = (*PersonService)(&c.common)
 	c.Places = (*PlaceService)(&c.common)
+	c.Profile = (*ProfileService)(&c.common)
 
 	return c
 }

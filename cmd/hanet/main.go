@@ -22,6 +22,9 @@ var cli struct {
 		Ls     DeviceLsCmd               `cmd:"" help:"List device at the place."`
 		Status DeviceConnectionStatusCmd `cmd:"" help:"Get device connection status."`
 	} `cmd:""`
+	Profile struct {
+		Me ProfileMeCmd `cmd:"" help:"Get profile of current user."`
+	} `cmd:""`
 }
 
 func main() {

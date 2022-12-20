@@ -16,7 +16,7 @@ type Person struct {
 	AliasID string `json:"aliasID"`
 	PlaceID int    `json:"placeID"`
 	Title   string `json:"title"`
-	Type    string `json:"type"`
+	Type    int    `json:"type"`
 }
 
 type PersonFaceUpdateRequest struct {

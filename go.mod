@@ -1,8 +1,9 @@
-module giautm.dev/hanetai
+module github.com/viecco/hanetai
 
 go 1.16
 
 require (
+	giautm.dev/hanetai v0.2.1
 	github.com/alecthomas/kong v0.6.1
 	github.com/google/go-querystring v1.0.0
 	go.opencensus.io v0.23.0

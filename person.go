@@ -5,8 +5,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"mime/multipart"
+	"net/http"
 	"strconv"
+
+	"github.com/rs/zerolog/log"
 )
 
 type PersonService service
@@ -87,7 +91,9 @@ func (s *PersonService) Register(ctx context.Context, pu PersonRegisterRequest) 
 	}
 
 	var p PersonRegisterResponse
-	_, err = s.client.Do(ctx, req, &p)
+	res, err := s.client.Do(ctx, req, &p)
+	s.logResponse(res)
+
 	if err != nil {
 		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
 			serr.Person = p.Person
@@ -117,7 +123,9 @@ func (s *PersonService) RegisterByURL(ctx context.Context, pu PersonRegisterURLR
 	}
 
 	var p PersonRegisterResponse
-	_, err = s.client.Do(ctx, req, &p)
+	res, err := s.client.Do(ctx, req, &p)
+	s.logResponse(res)
+
 	if err != nil {
 		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
 			serr.Person = p.Person
@@ -142,7 +150,9 @@ func (s *PersonService) UpdateByFaceImage(ctx context.Context, pu PersonFaceUpda
 	}
 
 	var p PersonRegisterResponse
-	_, err = s.client.Do(ctx, req, &p)
+	res, err := s.client.Do(ctx, req, &p)
+	s.logResponse(res)
+
 	if err != nil {
 		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
 			serr.Person = p.Person
@@ -166,7 +176,9 @@ func (s *PersonService) UpdateByFaceURL(ctx context.Context, pu PersonFaceURLUpd
 	}
 
 	var p PersonRegisterResponse
-	_, err = s.client.Do(ctx, req, &p)
+	res, err := s.client.Do(ctx, req, &p)
+	s.logResponse(res)
+
 	if err != nil {
 		if serr, ok := err.(*ServerError); ok && serr.Code == errCodeDuplicatedImage {
 			serr.Person = p.Person
@@ -185,7 +197,8 @@ func (s *PersonService) Remove(ctx context.Context, data PersonRemoveRequest) er
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
 	return err
 }
 
@@ -200,7 +213,8 @@ func (s *PersonService) RemoveByPlace(ctx context.Context, data PersonRemoveByPl
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
 	return err
 }
 
@@ -215,7 +229,8 @@ func (s *PersonService) RemoveByListAliasID(ctx context.Context, data PersonRemo
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
 	return err
 }
 
@@ -229,7 +244,8 @@ func (s *PersonService) RemoveByID(ctx context.Context, data PersonRemoveByIDReq
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
 	return err
 }
 
@@ -260,7 +276,9 @@ func (s *PersonService) Update(ctx context.Context, data PersonUpdateRequest) er
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
+
 	return err
 }
 
@@ -276,7 +294,8 @@ func (s *PersonService) UpdateAliasID(ctx context.Context, data PersonUpdateAlia
 		return err
 	}
 
-	_, err = s.client.Do(ctx, req, nil)
+	res, err := s.client.Do(ctx, req, nil)
+	s.logResponse(res)
 	return err
 }
 
@@ -302,7 +321,8 @@ func (s *PersonService) ListByPlace(ctx context.Context, data PersonListByPlaceR
 	}
 
 	var a []PersonListItem
-	_, err = s.client.Do(ctx, req, &a)
+	res, err := s.client.Do(ctx, req, &a)
+	s.logResponse(res)
 	return a, err
 }
 
@@ -322,7 +342,9 @@ func (s *PersonService) ListByAliasIDAllPlace(ctx context.Context, data ListByAl
 	}
 
 	var a []PersonListItemWithPlace
-	_, err = s.client.Do(ctx, req, &a)
+	res, err := s.client.Do(ctx, req, &a)
+	s.logResponse(res)
+
 	return a, err
 }
 
@@ -337,7 +359,8 @@ func (s *PersonService) UserInfoByAliasID(ctx context.Context, data UserInfoByAl
 	}
 
 	var a []PersonListItemWithPlace
-	_, err = s.client.Do(ctx, req, &a)
+	res, err := s.client.Do(ctx, req, &a)
+	s.logResponse(res)
 	return a, err
 }
 
@@ -353,4 +376,14 @@ func (s *PersonService) TakeFacePicture(ctx context.Context, data TakeFacePictur
 
 	_, err = s.client.Do(ctx, req, nil)
 	return err
+}
+
+func (s *PersonService) logResponse(res *http.Response) {
+	body, err := ioutil.ReadAll(res.Body) // response body is []byte
+	if err != nil {
+		log.Error().Msg(err.Error())
+		return
+	}
+
+	log.Info().Msg(string(body))
 }
